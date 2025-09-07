@@ -26,11 +26,45 @@ export const getContests = async (req, res) => {
     }
 };
 
+// export const getContest = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const contest = await Contest.findById(id);
+//         if (!contest) return res.status(404).json({ error: "Contest not found" });
+
+//         const now = Date.now();
+//         const start = new Date(contest.startTime).getTime();
+//         const end = new Date(contest.endTime).getTime();
+
+//         let status = "upcoming";
+//         if (now >= start && now <= end) status = "live";
+//         else if (now > end) status = "ended";
+
+//         if (status === "live" && (!contest.questions || contest.questions.length === 0)) {
+//             await assignRandomIfEmpty(contest, contest.numQuestions || 5);
+//         }
+
+//         const populated = await Contest.findById(id)
+//             .populate("questions", "title difficulty description")
+//             .populate("participants", "name email");
+
+//         return res.json({ contest: populated, status, serverTime: now });
+//     } catch (e) {
+//         return res.status(500).json({ error: e.message });
+//     }
+// };
+
+
+
 export const getContest = async (req, res) => {
     try {
         const { id } = req.params;
+        // Fetch the contest document just once
         const contest = await Contest.findById(id);
-        if (!contest) return res.status(404).json({ error: "Contest not found" });
+
+        if (!contest) {
+            return res.status(404).json({ error: "Contest not found" });
+        }
 
         const now = Date.now();
         const start = new Date(contest.startTime).getTime();
@@ -40,19 +74,27 @@ export const getContest = async (req, res) => {
         if (now >= start && now <= end) status = "live";
         else if (now > end) status = "ended";
 
+        // Check if questions need to be assigned
         if (status === "live" && (!contest.questions || contest.questions.length === 0)) {
+            // This helper function saves the contest after adding questions
             await assignRandomIfEmpty(contest, contest.numQuestions || 5);
         }
 
-        const populated = await Contest.findById(id)
-            .populate("questions", "title difficulty description")
-            .populate("participants", "name email");
+        // Now, populate the fields on the *same contest object* we've been working with
+        const populatedContest = await contest.populate([
+            { path: "questions", select: "title difficulty description" },
+            { path: "participants", select: "name email" }
+        ]);
 
-        return res.json({ contest: populated, status, serverTime: now });
+        return res.json({ contest: populatedContest, status, serverTime: now });
+
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
 };
+
+
+
 
 export const createContest = async (req, res) => {
     try {

@@ -96,6 +96,30 @@ export const getContest = async (req, res) => {
 
 
 
+// export const createContest = async (req, res) => {
+//     try {
+//         const { name, startTime, endTime, numQuestions = 5 } = req.body;
+//         if (!name || !startTime || !endTime) {
+//             return res.status(400).json({ error: "name, startTime, endTime are required" });
+//         }
+//         const contest = await Contest.create({
+//             name: name.trim(),
+//             startTime: new Date(startTime),
+//             endTime: new Date(endTime),
+//             createdBy: req.user._id,
+//             participants: [req.user._id], // Creator is the first participant
+//             numQuestions: Number(numQuestions) || 5,
+//         });
+//         await assignRandomIfEmpty(contest, Number(numQuestions) || 5);
+//         const populated = await Contest.findById(contest._id).populate("questions", "title difficulty");
+//         return res.status(201).json(populated);
+//     } catch (e) {
+//         return res.status(500).json({ error: e.message });
+//     }
+// };
+
+
+
 export const createContest = async (req, res) => {
     try {
         const { name, startTime, endTime, numQuestions = 5 } = req.body;
@@ -107,16 +131,28 @@ export const createContest = async (req, res) => {
             startTime: new Date(startTime),
             endTime: new Date(endTime),
             createdBy: req.user._id,
-            participants: [req.user._id], // Creator is the first participant
+            participants: [req.user._id],
             numQuestions: Number(numQuestions) || 5,
         });
+
+        // This function saves the contest after adding questions
         await assignRandomIfEmpty(contest, Number(numQuestions) || 5);
-        const populated = await Contest.findById(contest._id).populate("questions", "title difficulty");
-        return res.status(201).json(populated);
+        
+        // NOW, populate the contest object we already have in memory
+        const populatedContest = await contest.populate({
+            path: "questions",
+            select: "title difficulty"
+        });
+
+        return res.status(201).json(populatedContest);
+
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
 };
+
+
+
 
 export const joinContest = async (req, res) => {
     try {

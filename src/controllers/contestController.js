@@ -7,15 +7,47 @@ import Submission from "../models/Submission.js";
 import User from "../models/User.js";
 
 // Helper: assign random questions
+// const assignRandomIfEmpty = async (contest, size = 5) => {
+//     const requested = Number(size) || Number(contest.numQuestions) || 5;
+//     const total = await Question.countDocuments();
+//     const finalSize = Math.min(requested, total);
+//     if (contest.questions && contest.questions.length >= finalSize) return;
+//     const sample = await Question.aggregate([{ $sample: { size: finalSize } }]);
+//     contest.questions = sample.map((q) => q._id);
+//     await contest.save();
+// };
+
+
 const assignRandomIfEmpty = async (contest, size = 5) => {
-    const requested = Number(size) || Number(contest.numQuestions) || 5;
-    const total = await Question.countDocuments();
-    const finalSize = Math.min(requested, total);
-    if (contest.questions && contest.questions.length >= finalSize) return;
-    const sample = await Question.aggregate([{ $sample: { size: finalSize } }]);
-    contest.questions = sample.map((q) => q._id);
+  const requested = Number(size) || Number(contest.numQuestions) || 5;
+  const total = await Question.countDocuments();
+  const finalSize = Math.min(requested, total);
+
+  console.log(`[assignRandomIfEmpty] Debug: requested=${requested}, totalInDB=${total}, finalSize=${finalSize}`);
+
+  if (contest.questions && contest.questions.length >= finalSize) {
+    console.log('[assignRandomIfEmpty] Debug: Contest already has enough questions:', contest.questions.length);
+    return;
+  }
+
+  if (finalSize === 0) {
+    console.warn('[assignRandomIfEmpty] Debug: finalSize is 0. No questions available in DB to assign.');
+    contest.questions = [];
     await contest.save();
+    return;
+  }
+
+  const sample = await Question.aggregate([{ $sample: { size: finalSize } }]);
+  console.log(`[assignRandomIfEmpty] Debug: Sampled ${sample.length} questions from DB.`);
+  contest.questions = sample.map((q) => q._id);
+  await contest.save();
+  console.log(`[assignRandomIfEmpty] Debug: Saved contest ${contest._id} with ${contest.questions.length} questions.`);
 };
+
+
+
+
+
 
 export const getContests = async (req, res) => {
     try {
@@ -172,6 +204,12 @@ export const joinContest = async (req, res) => {
     }
 };
 
+
+
+
+
+
+
 // --- ADDING THIS FUNCTION BACK ---
 export const assignRandomQuestions = async (req, res) => {
     try {
@@ -190,6 +228,15 @@ export const assignRandomQuestions = async (req, res) => {
         return res.status(500).json({ error: e.message });
     }
 };
+
+
+
+
+
+
+
+
+
 
 // --- ADDING THIS FUNCTION BACK ---
 export const getContestQuestions = async (req, res) => {

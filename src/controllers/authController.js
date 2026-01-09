@@ -61,7 +61,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// Profile
-export const getProfile = async (req, res) => {
-  res.json(req.user);
-};
+// // Profile
+// export const getProfile = async (req, res) => {
+//   res.json(req.user);
+// };

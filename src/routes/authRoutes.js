@@ -1,8 +1,8 @@
 //Routes for login/register
 
 import express from "express";
-import { registerUser, loginUser, getProfile } from "../controllers/authController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { registerUser, loginUser } from "../controllers/authController.js";
+//import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -10,8 +10,10 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
+
+
 // Private Route
-router.get("/profile", protect, getProfile);
+// router.get("/profile", protect, getProfile);
 
 export default router;
 

@@ -7,7 +7,7 @@ const groupSchema = new mongoose.Schema(
       required: true,
     },
     code: {
-      type: String, // auto-generated unique join code
+      type: String, 
       required: true,
       unique: true,
     },

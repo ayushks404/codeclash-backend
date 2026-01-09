@@ -10,7 +10,18 @@ const contestSchema = new mongoose.Schema(
     questions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    leaderboardSnapshot: { type: mongoose.Schema.Types.Mixed }, // optional snapshot
+    leaderboardSnapshot: {
+                          type: [
+                            {
+                              userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+                              name: String,
+                              score: Number,
+                              solved: Number
+                            }
+                          ],
+                          default: []
+                        },
+                        leaderboardSnapshotUpdatedAt: Date,
   },
   { timestamps: true }
 );

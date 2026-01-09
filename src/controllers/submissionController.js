@@ -7,10 +7,9 @@ import Submission from "../models/Submission.js";
 import Contest from "../models/Contest.js";
 import Question from "../models/Question.js";
 
-/**
- * This function runs the actual judging in the background.
- * It iterates through all test cases for a question.
- */
+
+//It iterates through all test cases for a question.
+
 const processSubmission = async (submissionId) => {
   try {
     const submission = await Submission.findById(submissionId);
@@ -74,7 +73,7 @@ export const createSubmission = async (req, res) => {
     }
     
     const contest = await Contest.findById(contestId).lean();
-    if (!contest) return res.status(44).json({ error: "Contest not found." });
+    if (!contest) return res.status(404).json({ error: "Contest not found." });
     
     const isParticipant = contest.participants.map(p => p.toString()).includes(req.user._id.toString());
     if (!isParticipant) {

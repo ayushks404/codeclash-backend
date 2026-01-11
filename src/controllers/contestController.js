@@ -7,6 +7,37 @@ import Submission from "../models/Submission.js";
 import User from "../models/User.js";
 
 
+
+//get status of contest
+export const getstatus = async (req, res) => {
+  try {
+    const contest = await Contest.findById(req.params.id); 
+
+    if (!contest) {
+      return res.status(404).json({ error: "Contest not found" });
+    }
+
+    const now = Date.now();
+    const start = new Date(contest.startTime).getTime();
+    const end = new Date(contest.endTime).getTime();
+
+    let status = "upcoming";
+    if (now >= start && now <= end) status = "live";
+    else if (now > end) status = "ended";
+
+    res.json({
+      status,
+      serverTime: now
+    });
+
+  } catch {
+    res.status(500).json({ error: "Failed to load contest" });
+  }
+};
+
+
+
+
 const assignRandomIfEmpty = async (contest, size = 5) => {
   // If questions are already assigned, do nothing
   if (contest.questions?.length) return;

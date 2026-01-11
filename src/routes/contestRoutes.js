@@ -8,6 +8,7 @@ import {
   assignRandomQuestions,
   getLeaderboard,
   getContestQuestions,
+  getstatus
 } from "../controllers/contestController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -20,5 +21,6 @@ router.get("/:id", protect, getContest);
 router.get("/:id/questions", protect, getContestQuestions);
 router.post("/:id/assign-random", protect, assignRandomQuestions);
 router.get("/:id/leaderboard", protect, getLeaderboard);
+router.get("/:id/status" , protect , getstatus);
 
 export default router;
